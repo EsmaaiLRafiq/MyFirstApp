@@ -42,13 +42,17 @@ jobs:
           touch ~/.android/repositories.cfg
           yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses || true
 
-      - name: Build Compressed APK via Flet (الضربة الصح)
+      - name: Build Compressed APK via Flet
         run: |
           cd $GITHUB_WORKSPACE
-          echo "y" | flet build apk . --flutter-build-args="--target-platform=android-arm64"
-
+          # تخصيص اسم التطبيق، الأيقونة، والأذونات المطلوبة للأندرويد
+          echo "y" | flet build apk . \
+            --product "الأذان" \
+            --project "com.azan.app" \
+            --flutter-build-args="--target-platform=android-arm64"
+            
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flet-app-apk
+          name: Azan-App-APK
           path: build/apk/*.apk
