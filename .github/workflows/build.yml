@@ -47,7 +47,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           echo "y" | flet build apk . || true
 
-      - name: Inject Custom Android Settings (التعديل الهندسي الدقيق)
+      - name: Inject Custom Android Settings & Fix Gradle Conflicts (تطهير وحقن شامل)
         run: |
           cd $GITHUB_WORKSPACE
           
@@ -57,13 +57,19 @@ jobs:
             sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">الأذان<\/string>/g' "$MAIN_STRINGS"
           fi
           
-          # 2. إضافة الأذونات في ملف الأندرويد الرئيسي فقط دون المكاتب الفرعية
+          # 2. إضافة الأذونات في ملف الأندرويد الرئيسي فقط
           MAIN_MANIFEST="build/flutter/android/app/src/main/AndroidManifest.xml"
           if [ -f "$MAIN_MANIFEST" ]; then
             sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />' "$MAIN_MANIFEST"
           fi
 
-      - name: Compile Ultra Compressed APK
+          # 3. حل تعارض الـ NDK abiFilters ومسح السطر اللي مسبب قفلة الـ Gradle
+          APP_GRADLE="build/flutter/android/app/build.gradle.kts"
+          if [ -f "$APP_GRADLE" ]; then
+            sed -i '/abiFilters.addAll/d' "$APP_GRADLE"
+          fi
+
+      - name: Compile Ultra Compressed APK (البناء النظيف)
         run: |
           cd build/flutter
           flutter build apk --release --target-platform=android-arm64 --split-per-abi
