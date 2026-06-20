@@ -29,6 +29,14 @@ jobs:
         with:
           flutter-version: '3.41.7'
 
+      - name: Accept Android Licenses
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: List files (كشف الملفات)
+        run: |
+          ls -R
+
       - name: Build APK via Flet
         run: |
-          yes | flet build apk main.py
+          yes | flet build apk
