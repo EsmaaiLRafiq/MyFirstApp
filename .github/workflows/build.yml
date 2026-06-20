@@ -42,17 +42,30 @@ jobs:
           touch ~/.android/repositories.cfg
           yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses || true
 
-      - name: Build Compressed APK via Flet
+      - name: Initialize App Shell (إنشاء ملفات الأندرويد)
         run: |
           cd $GITHUB_WORKSPACE
-          # تخصيص اسم التطبيق، الأيقونة، والأذونات المطلوبة للأندرويد
-          echo "y" | flet build apk . \
-            --product "الأذان" \
-            --project "com.azan.app" \
-            --flutter-build-args="--target-platform=android-arm64"
-            
+          # نخليه يعمل توليد للملفات بس ويقف قبل ما يبني الغلط
+          echo "y" | flet build apk . || true
+
+      - name: Inject Custom Android Settings (تعديل الاسم والأذونات والحجم غصب عنه)
+        run: |
+          cd $GITHUB_WORKSPACE
+          
+          # 1. تغيير اسم التطبيق في ملف الأندرويد الرسمي لـ "الأذان"
+          find build/ -name "AndroidManifest.xml" -exec sed -i 's/android:label=".*"/android:label="الأذان"/g' {} +
+          
+          # 2. إضافة أذونات الموقع الجغرافي والظهور على الشاشة رسميًا
+          find build/ -name "AndroidManifest.xml" -exec sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />' {} +
+
+      - name: Compile Ultra Compressed APK (البناء الفعلي المضغوط بمحرك فلاتر)
+        run: |
+          # هندخل للمجلد اللي الـ flet عمله ونبني بـ flutter الأصلي المقاوم للمساحات الكبيرة
+          cd build/flutter
+          flutter build apk --release --target-platform=android-arm64 --split-per-abi
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Azan-App-APK
-          path: build/apk/*.apk
+          name: Azan-App-Compressed
+          path: build/flutter/build/app/outputs/flutter-apk/*-release.apk
