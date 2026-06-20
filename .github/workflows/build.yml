@@ -29,18 +29,18 @@ jobs:
         with:
           flutter-version: '3.41.7'
 
-      - name: Clean Old Local Cache (تطهير شامل لملفات جهازك القديمة)
+      - name: Clean Old Local Cache
         run: |
           rm -rf build
           rm -rf dist
           rm -f main.spec
           rm -rf .flet
 
-      - name: Setup Android SDK Licenses
+      - name: Accept ALL Android & NDK Licenses (الموافقة الرسمية الشاملة)
         run: |
-          mkdir -p ${ANDROID_HOME}/licenses
-          echo -e "\n2c4dfa0b36645dd23a31317b3540114e047c00a6" > ${ANDROID_HOME}/licenses/android-sdk-license
-          echo -e "\n84831b9409646a547e31e3ef48c17a43d2fc21a7" > ${ANDROID_HOME}/licenses/android-sdk-preview-license
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses || true
 
       - name: Build APK via Flet
         run: |
