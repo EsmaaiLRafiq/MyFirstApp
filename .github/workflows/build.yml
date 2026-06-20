@@ -31,7 +31,7 @@ jobs:
 
       - name: Build APK via Flet
         run: |
-          flet build apk --name "Al-Moazin" --package-name com.esmaail.almoazin
+          flet build apk main.py --name "Al-Moazin" --package-name com.esmaail.almoazin
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
