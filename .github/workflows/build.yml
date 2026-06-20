@@ -29,16 +29,13 @@ jobs:
         with:
           flutter-version: '3.41.7'
 
-      - name: Accept Android Licenses
+      - name: Setup Android SDK Licenses
         run: |
-          yes | sdkmanager --licenses || true
-
-      - name: Clean Local Cache (تطهير المجلدات القديمة)
-        run: |
-          rm -rf build
-          rm -rf dist
-          rm -rf main.spec
+          mkdir -p ${ANDROID_HOME}/licenses
+          echo -e "\n2c4dfa0b36645dd23a31317b3540114e047c00a6" > ${ANDROID_HOME}/licenses/android-sdk-license
+          echo -e "\n84831b9409646a547e31e3ef48c17a43d2fc21a7" > ${ANDROID_HOME}/licenses/android-sdk-preview-license
 
       - name: Build APK via Flet
         run: |
-          yes | flet build apk main.py
+          cd $GITHUB_WORKSPACE
+          yes | flet build apk .
