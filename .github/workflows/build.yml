@@ -42,12 +42,12 @@ jobs:
           touch ~/.android/repositories.cfg
           yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses || true
 
-      - name: Build APK via Flet
+      - name: Build Compressed APK via Flet (البناء المضغوط)
         run: |
           cd $GITHUB_WORKSPACE
-          echo "y" | flet build apk .
+          echo "y" | flet build apk . --target-arch arm64-v8a
 
-      - name: Upload APK Artifact (إظهار ملف التحميل)
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: flet-app-apk
