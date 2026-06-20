@@ -42,25 +42,29 @@ jobs:
           touch ~/.android/repositories.cfg
           yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses || true
 
-      - name: Initialize App Shell (إنشاء ملفات الأندرويد)
+      - name: Initialize App Shell
         run: |
           cd $GITHUB_WORKSPACE
-          # نخليه يعمل توليد للملفات بس ويقف قبل ما يبني الغلط
           echo "y" | flet build apk . || true
 
-      - name: Inject Custom Android Settings (تعديل الاسم والأذونات والحجم غصب عنه)
+      - name: Inject Custom Android Settings (التعديل الهندسي الدقيق)
         run: |
           cd $GITHUB_WORKSPACE
           
-          # 1. تغيير اسم التطبيق في ملف الأندرويد الرسمي لـ "الأذان"
-          find build/ -name "AndroidManifest.xml" -exec sed -i 's/android:label=".*"/android:label="الأذان"/g' {} +
+          # 1. تغيير اسم التطبيق في ملف النصوص الرئيسي للأندرويد لـ "الأذان"
+          MAIN_STRINGS="build/flutter/android/app/src/main/res/values/strings.xml"
+          if [ -f "$MAIN_STRINGS" ]; then
+            sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">الأذان<\/string>/g' "$MAIN_STRINGS"
+          fi
           
-          # 2. إضافة أذونات الموقع الجغرافي والظهور على الشاشة رسميًا
-          find build/ -name "AndroidManifest.xml" -exec sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />' {} +
+          # 2. إضافة الأذونات في ملف الأندرويد الرئيسي فقط دون المكاتب الفرعية
+          MAIN_MANIFEST="build/flutter/android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MAIN_MANIFEST" ]; then
+            sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />' "$MAIN_MANIFEST"
+          fi
 
-      - name: Compile Ultra Compressed APK (البناء الفعلي المضغوط بمحرك فلاتر)
+      - name: Compile Ultra Compressed APK
         run: |
-          # هندخل للمجلد اللي الـ flet عمله ونبني بـ flutter الأصلي المقاوم للمساحات الكبيرة
           cd build/flutter
           flutter build apk --release --target-platform=android-arm64 --split-per-abi
 
