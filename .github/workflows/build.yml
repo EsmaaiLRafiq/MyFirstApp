@@ -29,6 +29,13 @@ jobs:
         with:
           flutter-version: '3.41.7'
 
+      - name: Clean Old Local Cache (تطهير شامل لملفات جهازك القديمة)
+        run: |
+          rm -rf build
+          rm -rf dist
+          rm -f main.spec
+          rm -rf .flet
+
       - name: Setup Android SDK Licenses
         run: |
           mkdir -p ${ANDROID_HOME}/licenses
